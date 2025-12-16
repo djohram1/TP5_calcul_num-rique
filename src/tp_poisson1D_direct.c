@@ -79,7 +79,7 @@ int main(int argc,char *argv[])
 
   set_GB_operator_colMajor_poisson1D(AB, &lab, &la, &kv);
   write_GB_operator_colMajor_poisson1D(AB, &lab, &la, "AB.dat");
-
+  
   printf("Solution with LAPACK\n");
   ipiv = (int *) calloc(la, sizeof(int));  /* Pivot indices for LU factorization */
 
@@ -106,9 +106,10 @@ int main(int argc,char *argv[])
 
   /* Alternative: solve directly using dgbsv */
   if (IMPLEM == SV) {
-    // TODO : use dgbsv
+    dgbsv_(&la, &kl, &ku, &NRHS, AB, &lab, ipiv, RHS, &la, &info);
+    if (info != 0) { printf("\n INFO DGBSV = %d\n", info);
+    }
   }
-
   /* Write results to files */
   write_GB_operator_colMajor_poisson1D(AB, &lab, &la, "LU.dat");  /* LU factors */
   write_xy(RHS, X, &la, "SOL.dat");  /* Solution at grid points (RHS now contains solution) */
