@@ -83,6 +83,14 @@ int main(int argc,char *argv[])
   printf("Solution with LAPACK\n");
   ipiv = (int *) calloc(la, sizeof(int));  /* Pivot indices for LU factorization */
 
+  printf("\nMatrix AB in band storage (column-major):\n");
+  for (int i = 0; i < la*lab; i+=4) {
+      printf("%f=", AB[i]);
+      printf("%f=", AB[i+1]);
+      printf("%f=", AB[i+2]);
+      printf("%f\n", AB[i+3]);
+  }
+
   /* LU Factorization using LAPACK's general band factorization */
   if (IMPLEM == TRF) {
     dgbtrf_(&la, &la, &kl, &ku, AB, &lab, ipiv, &info);
@@ -110,6 +118,15 @@ int main(int argc,char *argv[])
     if (info != 0) { printf("\n INFO DGBSV = %d\n", info);
     }
   }
+
+  printf("\nMatrix AB in band storage after LU(column-major):\n");
+  for (int i = 0; i < la*lab; i+=4) {
+      printf("%f=", AB[i]);
+      printf("%f=", AB[i+1]);
+      printf("%f=", AB[i+2]);
+      printf("%f\n", AB[i+3]);
+  }
+
   /* Write results to files */
   write_GB_operator_colMajor_poisson1D(AB, &lab, &la, "LU.dat");  /* LU factors */
   write_xy(RHS, X, &la, "SOL.dat");  /* Solution at grid points (RHS now contains solution) */

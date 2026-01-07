@@ -26,7 +26,7 @@ void set_GB_operator_colMajor_poisson1D(double* AB, int *lab, int *la, int *kv){
 }
 
 void set_GB_operator_colMajor_poisson1D_Id(double* AB, int *lab, int *la, int *kv){
-  // TODO: Fill AB with the identity matrix
+  // Fill AB with the identity matrix
   // Only the main diagonal should have 1, all other entries are 0
     int i, j;
     int n = *la;      // nombre de points
@@ -45,7 +45,7 @@ void set_GB_operator_colMajor_poisson1D_Id(double* AB, int *lab, int *la, int *k
 }
 
 void set_dense_RHS_DBC_1D(double* RHS, int* la, double* BC0, double* BC1){
-  // TODO: Compute RHS vector
+  // Compute RHS vector
    int n = *la;
 
     // Initialiser le RHS à zéro
@@ -61,7 +61,7 @@ void set_dense_RHS_DBC_1D(double* RHS, int* la, double* BC0, double* BC1){
 }  
 
 void set_analytical_solution_DBC_1D(double* EX_SOL, double* X, int* la, double* BC0, double* BC1){
-  // TODO: Compute the exact analytical solution at each grid point
+  // Compute the exact analytical solution at each grid point
   // This depends on the source term f(x) used in set_dense_RHS_DBC_1D
   int n = *la;
 
@@ -72,7 +72,7 @@ void set_analytical_solution_DBC_1D(double* EX_SOL, double* X, int* la, double* 
 }  
 
 void set_grid_points_1D(double* x, int* la){
-  // TODO: Generate uniformly spaced grid points in [0,1]
+  // Generate uniformly spaced grid points in [0,1]
    int n = *la;           // nombre de points intérieurs
     double h = 1.0 / (n + 1);  // pas de discrétisation
 
@@ -82,7 +82,7 @@ void set_grid_points_1D(double* x, int* la){
 }
 
 double relative_forward_error(double* x, double* y, int* la){
-  // TODO: Compute the relative error using BLAS functions (dnrm2, daxpy or manual loop)
+  // Compute the relative error using BLAS functions (dnrm2, daxpy or manual loop)
   //return 0.0;
   int n = *la;
     double num = 0.0;   // norme de x - y
@@ -102,16 +102,31 @@ double relative_forward_error(double* x, double* y, int* la){
 }
 
 int indexABCol(int i, int j, int *lab){
-  // TODO: Return the correct index formula for column-major band storage
- // return 0;
+  // Return the correct index formula for column-major band storage
+  return j*(*lab)+i;
 }
 
 int dgbtrftridiag(int *la, int*n, int *kl, int *ku, double *AB, int *lab, int *ipiv, int *info){
-  // TODO: Implement specialized LU factorization for tridiagonal matrices
+  // Implement specialized LU factorization for tridiagonal matrices
+    int i;
+    *info = 0;
+    for (int i = 0; i < *n; i++) {
+        ipiv[i] = i + 1; // Initialisation des indices de pivot
+    }
+
+    for (i = 0; i < *n - 1; i++) {
+        if (AB[indexABCol(2, i, lab)] == 0.0) {
+            *info = i + 1; // matrice singulière
+            return *info;
+        }
+        double factor = AB[indexABCol(1, i + 1, lab)] / AB[indexABCol(2, i, lab)];
+        AB[indexABCol(1, i + 1, lab)] = factor; // stocker le multiplicateur
+        AB[indexABCol(2, i + 1, lab)] -= factor * AB[indexABCol(3, i, lab)];
+        
+    }
+
+ return *info;
+
 }
 
-
-//docker build -f docker/Dockerfile --progress plain -t tp-cn:latest .
-//docker run --rm -it tp-cn:latest
-//cat AB.dat
 
